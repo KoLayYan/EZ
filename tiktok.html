@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="my" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikSnap Ultra | Sketchware WebView</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-[#030712] text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="w-full py-5 px-6 border-b border-slate-800/60 backdrop-blur-xl sticky top-0 z-50 bg-[#030712]/80">
+        <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">TikSnap App</span>
+            </div>
+            <div class="text-xs font-semibold px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                WebView Ready
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-10 flex flex-col items-center">
+        
+        <div class="text-center space-y-3 mb-8">
+            <h1 class="text-2xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">TikTok Video & Photo Downloader</h1>
+            <p class="text-slate-400 text-xs md:text-sm max-w-lg mx-auto">ရေစာ (Watermark) မပါဘဲ ဗီဒီယိုနှင့် ဓာတ်ပုံများကို လွယ်ကူလျင်မြန်စွာ ဒေါင်းလုဒ်လုပ်ပါ။</p>
+        </div>
+
+        <!-- Input Box Card -->
+        <div class="w-full bg-slate-900/60 border border-slate-800/80 p-3 rounded-3xl shadow-2xl backdrop-blur-xl flex flex-col md:flex-row gap-3">
+            <input type="text" id="urlInput" placeholder="TikTok လင့်ခ်ကို ဤနေရာတွင် ကူးထည့်ပါ..." 
+                class="flex-grow bg-slate-950/80 border border-slate-800/80 text-slate-200 placeholder-slate-500 px-5 py-4 rounded-2xl focus:outline-none focus:border-indigo-500 transition-all text-sm">
+            <button onclick="handleDownload()" id="downloadBtn" 
+                class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center space-x-2 text-sm cursor-pointer active:scale-95">
+                <span>ဒေတာ ရယူမည်</span>
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loader" class="hidden mt-12 flex flex-col items-center space-y-4">
+            <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs text-slate-400 font-medium tracking-wide">ဖိုင်များကို ရယူနေပါပြီ၊ ခေတ္တစောင့်ဆိုင်းပါ...</p>
+        </div>
+
+        <!-- Result Section -->
+        <div id="resultContainer" class="hidden w-full mt-8 space-y-6">
+            
+            <!-- Creator Profile Card -->
+            <div class="bg-slate-900/40 border border-slate-800/80 p-4 rounded-2xl flex items-center space-x-4 backdrop-blur-md">
+                <img id="authorAvatar" src="" alt="Avatar" class="w-12 h-12 rounded-full border border-slate-700 object-cover shadow-md">
+                <div>
+                    <h3 id="authorName" class="font-bold text-slate-200 text-base"></h3>
+                    <p class="text-xs text-slate-400">TikTok Creator</p>
+                </div>
+            </div>
+
+            <!-- Video Section -->
+            <div id="videoSection" class="hidden bg-slate-900/40 border border-slate-800/80 p-6 rounded-3xl backdrop-blur-md space-y-5">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400">ဗီဒီယို ဖိုင်</h4>
+                    <span class="text-xs text-slate-400">Watermark ကင်းစင်သည်</span>
+                </div>
+                <div class="flex flex-col sm:flex-row items-center gap-6">
+                    <video id="videoPreview" src="" controls class="w-full sm:w-56 h-32 object-cover rounded-2xl border border-slate-800 shadow-lg"></video>
+                    <div class="flex-grow w-full space-y-3">
+                        <button onclick="downloadFile(currentVideoUrl, 'tiktok_video.mp4')" 
+                            class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 cursor-pointer active:scale-95">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>ဗီဒီယို ဒေါင်းလုဒ်လုပ်မည်</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Horizontal Photos Slide Section -->
+            <div id="photoSection" class="hidden bg-slate-900/40 border border-slate-800/80 p-6 rounded-3xl backdrop-blur-md space-y-5">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400">ဓာတ်ပုံများ (Slide Photos)</h4>
+                    <span id="photoCount" class="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full font-medium"></span>
+                </div>
+                
+                <!-- Horizontal Grid / Scroll Container -->
+                <div id="photosGrid" class="flex overflow-x-auto no-scrollbar gap-4 pb-3 pt-1 snap-x">
+                    <!-- Dynamic Photos Cards injected here -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-6 text-center text-xs text-slate-600 border-t border-slate-900/80">
+        <p>© 2026 TikSnap App. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let currentVideoUrl = '';
+
+        async function handleDownload() {
+            const urlInput = document.getElementById('urlInput').value.trim();
+            const loader = document.getElementById('loader');
+            const resultContainer = document.getElementById('resultContainer');
+            const videoSection = document.getElementById('videoSection');
+            const photoSection = document.getElementById('photoSection');
+            
+            if (!urlInput) {
+                alert('ကျေးဇူးပြု၍ TikTok လင့်ခ် ထည့်သွင်းပါ။');
+                return;
+            }
+
+            loader.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+            videoSection.classList.add('hidden');
+            photoSection.classList.add('hidden');
+
+            try {
+                const apiUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(urlInput)}&hd=1`;
+                const response = await fetch(apiUrl);
+                const resData = await response.json();
+
+                loader.classList.add('hidden');
+
+                if (resData.code === 0 && resData.data) {
+                    const data = resData.data;
+
+                    document.getElementById('authorAvatar').src = data.author?.avatar || '';
+                    document.getElementById('authorName').innerText = data.author?.nickname || 'TikTok User';
+
+                    resultContainer.classList.remove('hidden');
+
+                    if (data.play) {
+                        videoSection.classList.remove('hidden');
+                        currentVideoUrl = data.play;
+                        document.getElementById('videoPreview').src = data.play;
+                    }
+
+                    if (data.images && data.images.length > 0) {
+                        photoSection.classList.remove('hidden');
+                        document.getElementById('photoCount').innerText = `${data.images.length} ပုံ ပါဝင်သည်`;
+                        
+                        const grid = document.getElementById('photosGrid');
+                        grid.innerHTML = '';
+
+                        data.images.forEach((imgUrl, index) => {
+                            const card = document.createElement('div');
+                            card.className = 'min-w-[200px] sm:min-w-[220px] snap-start bg-slate-950/80 border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between group';
+                            
+                            card.innerHTML = `
+                                <div class="aspect-[3/4] w-full overflow-hidden bg-slate-900 relative">
+                                    <img src="${imgUrl}" alt="Photo ${index + 1}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <span class="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">#${index + 1}</span>
+                                </div>
+                                <div class="p-3 bg-slate-900/90 border-t border-slate-800/60">
+                                    <button onclick="downloadFile('${imgUrl}', 'tiktok_photo_${index + 1}.jpg')" 
+                                        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition-all shadow flex items-center justify-center space-x-1 cursor-pointer active:scale-95">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                        <span>ဒေါင်းလုဒ်ဆွဲရန်</span>
+                                    </button>
+                                </div>
+                            `;
+                            grid.appendChild(card);
+                        });
+                    }
+
+                } else {
+                    alert('အချက်အလက် ရယူ၍မရပါ။ လင့်ခ်မှန်ကန်မှု ရှိမရှိ စစ်ဆေးပါ။');
+                }
+
+            } catch (err) {
+                loader.classList.add('hidden');
+                console.error(err);
+                alert('ချိတ်ဆက်မှု အမှားအယွင်း ရှိပါသည်။ နောက်တစ်ကြိမ် ထပ်ကြိုးစားပါ။');
+            }
+        }
+
+        // Sketchware WebView Compatible Download Handler
+        function downloadFile(fileUrl, filename) {
+            // Android WebView ထဲမှာ Download လင့်ခ်ကို တိုက်ရိုက်ဖမ်းယူနိုင်ရန် target _blank ဖြင့် ဖွင့်ပေးခြင်း
+            const a = document.createElement('a');
+            a.href = fileUrl;
+            a.setAttribute('download', filename);
+            a.setAttribute('target', '_blank');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
+
